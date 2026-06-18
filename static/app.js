@@ -34,7 +34,8 @@ const elements = {
     tweetTextarea: document.getElementById('tweet-textarea'),
     charCount: document.getElementById('char-count'),
     modalCancelBtn: document.getElementById('modal-cancel-btn'),
-    modalTweetBtn: document.getElementById('modal-tweet-btn')
+    modalTweetBtn: document.getElementById('modal-tweet-btn'),
+    btnExportCsv: document.getElementById('btn-export-csv')
 };
 
 // Initialize
@@ -95,6 +96,9 @@ function setupEventListeners() {
         window.open(twitterUrl, '_blank', 'noopener,noreferrer');
         closeModal();
     });
+    
+    // Export CSV
+    elements.btnExportCsv.addEventListener('click', exportToCSV);
 }
 
 // Fetch Release Notes
@@ -207,11 +211,18 @@ function renderTimeline() {
                     <span class="badge ${categoryClass}">${release.category}</span>
                 </div>
                 <div class="share-action">
+                    <button class="btn-copy" data-index="${index}">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                        <span>Copy</span>
+                    </button>
                     <button class="btn-share" data-index="${index}">
                         <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
                             <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
                         </svg>
-                        Share Update
+                        <span>Share</span>
                     </button>
                 </div>
             </div>
@@ -219,6 +230,11 @@ function renderTimeline() {
                 ${release.content}
             </div>
         `;
+        
+        // Listen to copy button
+        card.querySelector('.btn-copy').addEventListener('click', (e) => {
+            copyReleaseToClipboard(release, e.currentTarget);
+        });
         
         // Listen to share button
         card.querySelector('.btn-share').addEventListener('click', () => {
@@ -277,3 +293,68 @@ function closeModal() {
     elements.shareModal.classList.add('hidden');
     state.selectedReleaseForShare = null;
 }
+
+// Copy single release note to clipboard
+async function copyReleaseToClipboard(release, buttonEl) {
+    const plainTextContent = htmlToPlainText(release.content).trim();
+    const formattedText = `BigQuery Update [${release.category}] - ${release.date}\n\n${plainTextContent}`;
+    
+    try {
+        await navigator.clipboard.writeText(formattedText);
+        
+        // Visual Feedback
+        buttonEl.classList.add('copied');
+        const textSpan = buttonEl.querySelector('span');
+        const originalText = textSpan.textContent;
+        textSpan.textContent = 'Copied!';
+        
+        setTimeout(() => {
+            buttonEl.classList.remove('copied');
+            textSpan.textContent = originalText;
+        }, 1500);
+    } catch (err) {
+        console.error('Failed to copy to clipboard:', err);
+        alert('Could not copy to clipboard. Please try manually copying.');
+    }
+}
+
+// Export current list to CSV
+function exportToCSV() {
+    if (state.filteredReleases.length === 0) {
+        alert('No releases available to export.');
+        return;
+    }
+    
+    // Header
+    const csvRows = [['Date', 'Category', 'Plain Text Content', 'HTML Content']];
+    
+    state.filteredReleases.forEach(release => {
+        const plainText = htmlToPlainText(release.content).trim();
+        csvRows.push([
+            release.date,
+            release.category,
+            plainText,
+            release.content
+        ]);
+    });
+    
+    // Escape and join
+    const csvContent = csvRows.map(row => {
+        return row.map(val => {
+            const escaped = val.replace(/"/g, '""');
+            return `"${escaped}"`;
+        }).join(',');
+    }).join('\n');
+    
+    // Download trigger
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `bigquery_releases_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
