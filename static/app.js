@@ -35,11 +35,15 @@ const elements = {
     charCount: document.getElementById('char-count'),
     modalCancelBtn: document.getElementById('modal-cancel-btn'),
     modalTweetBtn: document.getElementById('modal-tweet-btn'),
-    btnExportCsv: document.getElementById('btn-export-csv')
+    btnExportCsv: document.getElementById('btn-export-csv'),
+    btnThemeToggle: document.getElementById('btn-theme-toggle'),
+    themeIconSun: document.querySelector('.theme-icon-sun'),
+    themeIconMoon: document.querySelector('.theme-icon-moon')
 };
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
+    initTheme();
     fetchReleases();
     setupEventListeners();
 });
@@ -99,6 +103,9 @@ function setupEventListeners() {
     
     // Export CSV
     elements.btnExportCsv.addEventListener('click', exportToCSV);
+    
+    // Theme toggle
+    elements.btnThemeToggle.addEventListener('click', toggleTheme);
 }
 
 // Fetch Release Notes
@@ -357,4 +364,33 @@ function exportToCSV() {
     link.click();
     document.body.removeChild(link);
 }
+
+// Theme Management Logic
+function initTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-theme');
+        updateThemeIcons(true);
+    } else {
+        document.body.classList.remove('light-theme');
+        updateThemeIcons(false);
+    }
+}
+
+function toggleTheme() {
+    const isLight = document.body.classList.toggle('light-theme');
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    updateThemeIcons(isLight);
+}
+
+function updateThemeIcons(isLight) {
+    if (isLight) {
+        elements.themeIconSun.classList.add('hidden');
+        elements.themeIconMoon.classList.remove('hidden');
+    } else {
+        elements.themeIconSun.classList.remove('hidden');
+        elements.themeIconMoon.classList.add('hidden');
+    }
+}
+
 

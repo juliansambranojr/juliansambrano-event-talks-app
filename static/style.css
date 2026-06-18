@@ -744,3 +744,57 @@ h1, h2, h3, h4 {
     color: var(--color-feature);
 }
 
+/* Light Theme Variable Overrides */
+body.light-theme {
+    --bg-primary: #f8fafc;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #f1f5f9;
+    --border-color: #e2e8f0;
+    --border-hover: #cbd5e1;
+    
+    --text-primary: #0f172a;
+    --text-secondary: #334155;
+    --text-muted: #64748b;
+    
+    --primary: #0284c7;
+    --primary-hover: #0369a1;
+    --primary-gradient: linear-gradient(135deg, #0284c7, #4f46e5);
+    
+    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.04), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+    --shadow-glow: 0 0 15px rgba(2, 132, 199, 0.08);
+}
+
+/* Smooth theme transitions */
+body, 
+.app-header, 
+.release-card, 
+.controls-panel, 
+.search-box input, 
+.filter-chip, 
+.btn, 
+.modal, 
+.preview-card-compact, 
+textarea {
+    transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                color 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Header actions layout */
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.btn-icon-only {
+    padding: 0.75rem;
+    aspect-ratio: 1 / 1;
+    border-radius: 12px;
+}
+
+
